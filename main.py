@@ -1,4 +1,5 @@
 import os
+import uuid
 
 import requests
 import streamlit as st
@@ -10,6 +11,13 @@ st.set_page_config(page_title="My Chatbot", layout="wide")
 load_dotenv()
 
 server_base_url = os.environ.get("SERVER_BASE_URL") or SERVER_BASE_URL
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+SESSION_ID = st.session_state.session_id
+
+
 # Center the chat, remove sidebar, adjust widths
 st.markdown(
     """
@@ -102,7 +110,8 @@ if user_input:
 
         with st.spinner("Processing..."):
             response = requests.post(
-                f"{server_base_url}/chat", json={"query": user_input}
+                f"{server_base_url}/chat",
+                json={"query": user_input, "session_id": SESSION_ID},
             )
             bot_reply = response.json()["message"]
 
