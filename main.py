@@ -4,10 +4,12 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
+from constants import SERVER_BASE_URL
+
 st.set_page_config(page_title="My Chatbot", layout="wide")
 load_dotenv()
 
-
+server_base_url = os.environ.get("SERVER_BASE_URL") or SERVER_BASE_URL
 # Center the chat, remove sidebar, adjust widths
 st.markdown(
     """
@@ -100,7 +102,7 @@ if user_input:
 
         with st.spinner("Processing..."):
             response = requests.post(
-                f"{os.environ.get("SERVER_BASE_URL")}/chat", json={"query": user_input}
+                f"{server_base_url}/chat", json={"query": user_input}
             )
             bot_reply = response.json()["message"]
 
