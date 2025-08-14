@@ -109,11 +109,15 @@ if user_input:
         message_placeholder = st.empty()
 
         with st.spinner("Processing..."):
-            response = requests.post(
-                f"{server_base_url}/chat",
-                json={"query": user_input, "session_id": SESSION_ID},
-            )
-            bot_reply = response.json()["message"]
+            try:
+                response = requests.post(
+                    f"{server_base_url}/chat",
+                    json={"query": user_input, "session_id": SESSION_ID},
+                )
+                bot_reply = response.json()["message"]
+            except Exception as e:
+                bot_reply = "Sorry for the inconvenience, I am unable to process your request at the moment. Please try again later."
+                print(f"Error processing response: {e}")
 
         message_placeholder.write(bot_reply)
 
