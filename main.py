@@ -3,13 +3,11 @@ import uuid
 
 import requests
 import streamlit as st
-from dotenv import load_dotenv
 
 from constants import SERVER_BASE_URL
 from jwt_token import create_jwt_token
 
 st.set_page_config(page_title="My Chatbot", layout="wide")
-load_dotenv()
 
 server_base_url = os.environ.get("SERVER_BASE_URL") or SERVER_BASE_URL
 
@@ -124,7 +122,7 @@ if user_input:
                 }
 
                 response = requests.post(
-                    f"{server_base_url}/chat",
+                    f"{server_base_url}/v1/chat",
                     json={"query": user_input, "session_id": SESSION_ID},
                     headers=headers,
                 )
