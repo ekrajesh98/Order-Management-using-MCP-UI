@@ -16,6 +16,7 @@ if "session_id" not in st.session_state:
 
 
 SESSION_ID = st.session_state.session_id
+print(f"Session ID: {SESSION_ID}")
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "your-secret-key-here")
 USER_EMAIL = os.environ.get("USER_EMAIL", "user@example.com")
@@ -119,11 +120,12 @@ if user_input:
                 headers = {
                     "Authorization": f"Bearer {JWT_TOKEN}",
                     "Content-Type": "application/json",
+                    "X-Session-Unique-Id": SESSION_ID,
                 }
 
                 response = requests.post(
                     f"{server_base_url}/v1/chat",
-                    json={"query": user_input, "session_id": SESSION_ID},
+                    json={"query": user_input},
                     headers=headers,
                 )
                 bot_reply = response.json()["message"]
