@@ -11,12 +11,6 @@ st.set_page_config(page_title="My Chatbot", layout="wide")
 
 server_base_url = os.environ.get("SERVER_BASE_URL") or SERVER_BASE_URL
 
-if "session_id" not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
-
-
-SESSION_ID = st.session_state.session_id
-print(f"Session ID: {SESSION_ID}")
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "your-secret-key-here")
 USER_EMAIL = os.environ.get("USER_EMAIL", "user@example.com")
@@ -28,6 +22,23 @@ if "jwt_token" not in st.session_state:
     )
 
 JWT_TOKEN = st.session_state.jwt_token
+
+headers = {
+    "Authorization": f"Bearer {JWT_TOKEN}",
+    "Content-Type": "application/json",
+    "X-User-UUID": USER_GUID,
+}
+
+if "session_id" not in st.session_state:
+    response = requests.post(
+        f"{server_base_url}/api/v1/session",
+        headers=headers,
+    )
+    st.session_state.session_id = response.text.strip('"')
+
+
+SESSION_ID = st.session_state.session_id
+print(f"Session ID: {SESSION_ID}")
 
 
 st.markdown(
@@ -118,13 +129,12 @@ if user_input:
             try:
                 # Create headers with JWT token
                 headers = {
-                    "Authorization": f"Bearer {JWT_TOKEN}",
-                    "Content-Type": "application/json",
+                    **headers,
                     "X-Session-Unique-Id": SESSION_ID,
                 }
 
                 response = requests.post(
-                    f"{server_base_url}/v1/chat",
+                    f"{server_base_url}/api/v1/chat",
                     json={"query": user_input},
                     headers=headers,
                 )
