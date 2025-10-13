@@ -64,11 +64,6 @@ st.markdown(
         padding-right: 10px;
     }
 
-    /* Increase chat font size */
-    .stChatMessage p {
-        font-size: 18px !important;
-    }
-
     /* Fix the input at bottom center */
     .stChatInputContainer {
         position: fixed !important;
@@ -96,12 +91,35 @@ st.markdown(
     .stChatInputContainer textarea::placeholder {
         text-align: center;
     }
+
+    .user-bubble {
+        background: #E1F3FF;            /* Soft light blue */
+        color: #0A2540;                 /* Dark navy text for contrast */
+        padding: 12px 18px;
+        border-radius: 18px 2px 18px 18px;
+        max-width: 70%;
+        margin: 6px 0;
+        text-align: left;
+        font-size: 18px;
+        word-break: break-word;
+    }
+    .bot-bubble {
+        background: #F5F5F5;            /* Light neutral gray */
+        color: #1A1A1A;                 /* Almost black text */
+        padding: 12px 18px;
+        border-radius: 2px 18px 18px 18px;
+        max-width: 70%;
+        margin: 6px 0;
+        text-align: left;
+        font-size: 18px;
+        word-break: break-word;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.title("Order Management Assistant")
+st.title("Orders Management Assistant")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
@@ -109,41 +127,50 @@ if "messages" not in st.session_state:
 # Display chat messages
 st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 for msg in st.session_state["messages"]:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+    align = "flex-end" if msg["role"] == "user" else "flex-start"
+    bubble_class = "user-bubble" if msg["role"] == "user" else "bot-bubble"
+    st.markdown(
+        f'''
+        <div style="display: flex; justify-content: {align};">
+            <div class="{bubble_class}">
+                {msg["content"]}
+            </div>
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Chat input
-user_input = st.chat_input("Ask me something...")
-
+user_input = st.chat_input("Ask me something...", key="input_box")
 if user_input:
+    # append user message immediately
     st.session_state["messages"].append({"role": "user", "content": user_input})
+    # stash the pending query for phase 2
+    st.session_state["pending_query"] = user_input
+    # force a rerun so the user bubble appears right away
+    st.rerun()
 
-    with st.chat_message("user"):
-        st.write(user_input)
-
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-
-        with st.spinner("Processing..."):
-            try:
-                # Create headers with JWT token
-                headers = {
-                    **headers,
-                    "X-Session-Unique-Id": SESSION_ID,
-                }
-
-                response = requests.post(
-                    f"{server_base_url}/api/v1/chat",
-                    json={"query": user_input},
-                    headers=headers,
-                )
-                bot_reply = response.json()["message"]
-            except Exception as e:
-                bot_reply = "Sorry for the inconvenience, I am unable to process your request at the moment. Please try again later."
-                print(f"Error processing response: {e}")
-
-        message_placeholder.write(bot_reply)
-
+# 2) Phase 2: after rerun, detect pending and call server
+if "pending_query" in st.session_state:
+    query = st.session_state.pop("pending_query")
+    with st.spinner("Processing…"):
+        try:
+            headers = {
+                **headers,
+                "X-Session-Unique-Id": SESSION_ID,
+            }
+            response = requests.post(
+                f"{server_base_url}/api/v1/chat",
+                json={"query": query},
+                headers=headers,
+            )
+            bot_reply = response.json()["message"]
+        except Exception as e:
+            bot_reply = (
+                "Sorry for the inconvenience, I am unable to process "
+                "your request at the moment. Please try again later."
+            )
+            print(f"Error processing response: {e}")
+    # append assistant response and rerun to show it
     st.session_state["messages"].append({"role": "assistant", "content": bot_reply})
     st.rerun()
