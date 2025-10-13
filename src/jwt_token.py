@@ -16,4 +16,5 @@ def create_jwt_token(
     }
 
     token = jwt.encode(payload, secret_key, algorithm="RS256")
+    print(f"token: {token}")
     return token

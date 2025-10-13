@@ -1,0 +1,11 @@
+services:
+  chatbot-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chatbot_ui
+    container_name: chatbot_ui
+    ports:
+      - "0.0.0.0:8501:8501"
+    volumes:
+      - ./src:/app/src

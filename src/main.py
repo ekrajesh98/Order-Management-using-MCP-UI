@@ -4,8 +4,8 @@ import uuid
 import requests
 import streamlit as st
 
-from constants import SERVER_BASE_URL
-from jwt_token import create_jwt_token
+from src.constants import SERVER_BASE_URL
+from src.jwt_token import create_jwt_token
 
 st.set_page_config(page_title="My Chatbot", layout="wide")
 
