@@ -34,7 +34,7 @@ if "session_id" not in st.session_state:
         f"{server_base_url}/api/v1/session",
         headers=headers,
     )
-    st.session_state.session_id = response.text.strip('"')
+    st.session_state.session_id = response.json().get("session_uuid")
 
 
 SESSION_ID = st.session_state.session_id
