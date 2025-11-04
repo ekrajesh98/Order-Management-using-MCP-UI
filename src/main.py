@@ -1,11 +1,9 @@
 import os
-import uuid
 
 import requests
 import streamlit as st
 
 from src.constants import SERVER_BASE_URL
-from src.jwt_token import create_jwt_token
 
 st.set_page_config(page_title="My Chatbot", layout="wide")
 
@@ -13,20 +11,15 @@ server_base_url = os.environ.get("SERVER_BASE_URL") or SERVER_BASE_URL
 
 
 JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "your-secret-key-here")
-USER_EMAIL = os.environ.get("USER_EMAIL", "user@example.com")
-USER_GUID = os.environ.get("USER_GUID", str(uuid.uuid4()))
-
-if "jwt_token" not in st.session_state:
-    st.session_state.jwt_token = create_jwt_token(
-        JWT_SECRET_KEY, user_email=USER_EMAIL, user_guid=USER_GUID
-    )
-
-JWT_TOKEN = st.session_state.jwt_token
+USER_EMAIL = os.environ.get("USER_EMAIL")
+CLIENT_UUID = os.environ.get("CLIENT_UUID")
+USER_GUID = os.environ.get("USER_GUID")
 
 headers = {
-    "Authorization": f"Bearer {JWT_TOKEN}",
+    "auth-email": USER_EMAIL,
+    "client-uuid": CLIENT_UUID,
+    "auth-uuid": USER_GUID,
     "Content-Type": "application/json",
-    "X-User-UUID": USER_GUID,
 }
 
 if "session_id" not in st.session_state:
@@ -119,7 +112,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("Orders Management Assistant")
+st.title("Bookings Assistant")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
