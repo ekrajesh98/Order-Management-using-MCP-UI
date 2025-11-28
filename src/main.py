@@ -42,10 +42,7 @@ if "chat_config" not in st.session_state:
         print(f"Error fetching chat config: {e}")
         # Fallback to default values if config fetch fails
         st.session_state.chat_config = {
-            "assistant_initial_message_settings": {
-                "message": "Hi! How can I help you today?",
-                "buttons": [],
-            },
+            "assistant_initial_message": "Hi! How can I help you today?",
             "user_character_limit": 500,
         }
 
@@ -203,17 +200,13 @@ st.title("Bookings Assistant")
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
     # Add initial assistant message from config
-    initial_settings = CHAT_CONFIG.get("assistant_initial_message_settings", {})
-    if initial_settings.get("message"):
-        st.session_state["messages"].append(
-            {
-                "role": "assistant",
-                "content": initial_settings["message"],
-            }
-        )
-    # Store buttons in session state if available
-    if initial_settings.get("buttons"):
-        st.session_state["initial_buttons"] = initial_settings["buttons"]
+    assistant_initial_message = CHAT_CONFIG.get("assistant_initial_message", "")
+    st.session_state["messages"].append(
+        {
+            "role": "assistant",
+            "content": assistant_initial_message,
+        }
+    )
 
 # Display chat messages
 st.markdown('<div class="chat-container">', unsafe_allow_html=True)
